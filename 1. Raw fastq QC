@@ -1,0 +1,45 @@
+
+#$ -V
+#$ -cwd
+#$ -j y
+#$ -o /ks614/springtails/analyses/logs/fastqc_$JOB_ID.o
+
+set -e
+# Enter your directory and user name or ID below
+
+SCRATCH=/scratch/$USER/
+# Creates new director to ensure the old files are not over written
+mkdir -p $SCRATCH
+cd $SCRATCH
+
+start=`date +%s`
+
+
+#---------------------------------------------
+ls
+
+# Create a copy of data in new directory to prevent any data loss
+
+#echo "copying data in"
+
+# Provide your location/path of the file 
+
+#rsync /scratch/monoallelic/ks614/springtails/RNAseq/raw/*.fq.gz ./
+
+echo "Processing the data"
+for file in $(ls *.gz)
+do
+	fastqc -t 9 ${file}
+done
+
+echo "moving outputs"
+mv *html /scratch/monoallelic/ks614/springtails/RNAseq/
+
+echo "a clean directory is a happy directory"
+rm -r $SCRATCH/*
+
+#---------------------------------------------
+
+end=`date +%s`
+runtime=$(((end-start)/60))
+echo "runtime:"$runtime"mins
