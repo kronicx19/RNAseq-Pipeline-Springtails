@@ -1,0 +1,74 @@
+# Based on the quality of fastqc reports trim the ends, the quality is low remove or trim the low quality score reads
+
+############################################################################
+
+#!/bin/bash
+
+#PBS -N trimming
+#PBS -l walltime=07:00:00
+#PBS -l vmem=20gb
+#PBS -m bea
+#PBS -M ks614@student.le.ac.uk
+#PBS -l nodes=1:ppn=8
+
+# Run script in the working directory it was submitted in 
+cd $PBS_O_WORKDIR 
+
+# Load software needed (pigz needed for parallel zipping)
+module load cutadapt/1.11
+module load pigz/2.3.3
+
+###-------------------------------------
+### For just the pristine samples:
+###-------------------------------------
+
+# Trim 10 bases from reads
+for file in $(ls trim*1.fq.gz)
+do
+	base=$(basename $file "1.fq.gz")
+	cutadapt -u 12 -U -12 \
+	-o trim2_${base}1.fq.gz \
+	-p trim2_${base}2.fq.gz \
+	${base}1.fq.gz \
+	${base}2.fq.gz
+done
+
+############################################################################
+
+#!/bin/bash
+
+#PBS -N trimming
+#PBS -l walltime=00:00:00
+#PBS -l vmem=20gb
+#PBS -m bea
+#PBS -M ks614@student.le.ac.uk
+#PBS -l nodes=1:ppn=8
+
+# Run script in the working directory it was submitted in 
+cd $PBS_O_WORKDIR 
+
+# Load software needed (pigz needed for parallel zipping)
+module load cutadapt/1.11
+module load pigz/2.3.3
+
+###-------------------------------------
+### For all other samples:
+###-------------------------------------
+
+for file in $(ls *1.fq.gz)
+do
+	base=$(basename $file "1.fq.gz")
+	cutadapt -u 10 -u -10 -U 10 -U -10 \
+	-o trim_${base}1.fq.gz \
+	-p trim_${base}2.fq.gz \
+	${base}1.fq.gz \
+	${base}2.fq.gz
+done
+############################################################
+#Moving the trimmed sequences into new directory
+
+echo "Moving the rimmed output"
+
+mv trim_* /scratch/monoalellic/ks614/springtails/RNAseq/trimmed_RNAseq
+
+echo "Trimming of finished"
