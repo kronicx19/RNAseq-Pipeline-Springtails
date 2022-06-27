@@ -32,11 +32,8 @@ do
 	fastqc -t 9 ${file}
 done
 
-echo "moving outputs"
-mv *html /scratch/monoallelic/ks614/springtails/RNAseq/
-
-echo "a clean directory is a happy directory"
-rm -r $SCRATCH/*
+echo "moving outputs html into new directory"
+mv *html /scratch/monoallelic/ks614/springtails/RNAseq/output
 
 #---------------------------------------------
 
