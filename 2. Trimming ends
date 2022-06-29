@@ -69,6 +69,6 @@ done
 
 echo "Moving the rimmed output"
 
-mv trim_* /scratch/monoalellic/ks614/springtails/RNAseq/trimmed_RNAseq
+mv trim_* /scratch/monoallelic/ks614/springtails/RNAseq/trimmed_RNAseq
 
 echo "Trimming of finished"
