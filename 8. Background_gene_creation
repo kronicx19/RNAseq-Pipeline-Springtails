@@ -1,0 +1,29 @@
+#---------------------------------------------------
+# Background gene sets for levels of meth GO analysis
+#---------------------------------------------------
+
+setwd("~/Dropbox/Leicester_postdoc/Projects/Springtail_methylation/GO_terms")
+library(readr)
+
+# Read in the GO annotations
+GO_terms <- read_delim("springtail_GO_annotations.txt", 
+                                           delim = "\t", escape_double = FALSE, 
+                                           col_names = FALSE, trim_ws = TRUE)
+colnames(GO_terms) <- c("gene_id", "GOIds")
+
+
+# Make a list of all genes present in the diff exp analysis from DESeq2
+all_genes <- read_delim("diff_exp_output_log2FC_all_genes.txt", 
+                                                    delim = "\t", escape_double = FALSE, 
+                                                    trim_ws = TRUE)
+all_genes <- as.data.frame(all_genes$gene)
+colnames(all_genes) <- "gene_id"
+
+# Merge to annotate the GO terms
+all_genes_with_go <- merge(all_genes, GO_terms, by = "gene_id")
+
+#See how many genes are left, as some won't have GO annotations
+length(unique(all_genes_with_go$gene_id)) # 1489 / 3916
+
+# Write out file for GO enrichment analysis
+write.table(all_genes_with_go, file="background_go_term_set.txt", sep="\t",quote = F, col.names = T, row.names = F)
