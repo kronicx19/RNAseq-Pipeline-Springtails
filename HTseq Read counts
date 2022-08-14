@@ -1,0 +1,44 @@
+# UPDATED VERSION (15/07/22)
+
+# Make a conda environment
+conda create -n htseq_env
+conda activate htseq_env
+conda install -c bioconda htseq
+
+# Run a test (on an interactive job)
+htseq-count \
+-f bam \
+-o annotated_AF50.bam /
+/scratch/monoallelic/ks614/springtails/new_genome_dir/Bams_sorted/AF50_trimmed_sorted.bam /
+/scratch/monoallelic/ks614/springtails/new_genome_dir/GCA_910591605.1_Afus1_asm01_genomic.gtf /
+> AF50.counts
+
+
+# It works so put the following into a PBS script:
+
+#!/bin/bash
+
+#PBS -N htseq
+#PBS -l walltime=16:00:00
+#PBS -l vmem=100gb
+#PBS -m bea
+#PBS -M ks614@student.le.ac.uk
+#PBS -l nodes=1:ppn=10
+
+# Run script in the working directory it was submitted in
+cd $PBS_O_WORKDIR
+
+source ~/miniconda3/bin/activate htseq_env
+
+REF_GFF=/scratch/monoallelic//ks614/springtails/new_genome_dir/GCA_910591605.1_Afus1_asm01_genomic.gtf
+
+for file in $(ls *_sorted.bam)
+do
+    base=$(basename ${file} "_trimmed_sorted.bam")
+    htseq-count \
+    -f bam \
+    -o ${base}_annotated.bam \
+    ${file} \
+    ${REF_GFF} \
+    > ${base}.counts
+done
