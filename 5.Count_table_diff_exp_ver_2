@@ -1,0 +1,36 @@
+### Making a count table for differential expression analysis
+setwd("~/springtails/Read_count")
+library(readr)
+library(reshape2)
+library(data.table)
+
+# samples (NOTE: count files must be in working directory)
+file.list = list.files(("./"),pattern="*.counts")
+samples = as.character(sapply(file.list,function(s) gsub(".counts","", s)))
+
+# sample info
+info = read.csv("count_table_metadata.csv")
+
+# put together and rbind everything together in a data frame
+out = do.call(rbind, lapply(1:length(samples),
+                            function(i) {
+                              cnts = read_delim(file.list[[i]], "\t", escape_double = F, col_names = F, trim_ws = T) # counts
+                              colnames(cnts) = c("geneID","count")
+                              sampinfo = info[info$sample==samples[[i]],] # sample info
+                              suppressWarnings(data.frame(sampinfo, cnts))
+                            } ))
+head(out)
+nrow(out) 
+
+# Remove the sex info as we actually add this later
+out <- out[,-2]
+head(out)
+
+# Change format so deseq2 likes it
+out_wide <- dcast(out, geneID ~ sample)
+
+# Remove the non-gene lines
+out_filtered <- out_wide[out_wide$geneID %like% "AFUS",]
+head(out_filtered)
+
+write.table(out_filtered, "counts_diff_exp.txt", sep="\t", col.names = T, row.names = F, quote = F)
